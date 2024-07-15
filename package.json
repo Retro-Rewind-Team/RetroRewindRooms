@@ -1,0 +1,15 @@
+{
+  "name": "retrorewindweb",
+  "version": "1.0.0",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "ppebb",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "express": "^4.19.2",
+    "express-http-proxy": "^2.0.0"
+  }
+}

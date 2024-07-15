@@ -1,0 +1,33 @@
+@import "fonts.css";
+
+/* Most colors are taken from a screenshot of the Wheel Wizard Application eyedropped in krita */
+
+body {
+    background-color: #24252d;
+    color: white;
+    font-family: "Rubik";
+}
+
+img.mii {
+    max-width: 32px;
+    max-height: 32px;
+}
+
+#rooms-list>thead>tr,
+#rooms-list>tbody>tr {
+    font-size: 18px;
+}
+
+tr.player-row {
+    height: 46px;
+    min-height: 46px;
+}
+
+td.mii {
+    width: 32px;
+    min-width: 32px;
+}
+
+td {
+    padding: 5px 10px 5px 10px;
+}
