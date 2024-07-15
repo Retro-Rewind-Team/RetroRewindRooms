@@ -5,7 +5,7 @@
 body {
     background-color: #24252d;
     color: white;
-    font-family: "Rubik";
+    font-family: "Rubik", "CTMKF", monospace;
 }
 
 img.mii {
