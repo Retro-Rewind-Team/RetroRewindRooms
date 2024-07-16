@@ -1,11 +1,62 @@
 @import "fonts.css";
 
-/* Most colors are taken from a screenshot of the Wheel Wizard Application eyedropped in krita */
+html {
+    background-color: #24252d;
+    min-height: 100vh + 8px;
+}
 
 body {
-    background-color: #24252d;
+    width: 800px;
+    min-height: 100vh;
+    margin: auto;
     color: white;
     font-family: "Rubik", "CTMKF", monospace;
+}
+
+@media only screen and (max-width: 800px) {
+    body {
+        width: 100%;
+    }
+}
+
+hr {
+    color: white;
+}
+
+.title,
+.player-count,
+.rooms-header {
+    text-align: center;
+}
+
+.title {
+    margin-top: 0px;
+    margin-bottom: 0px;
+    padding-top: 20px;
+}
+
+.player-count {
+    margin: 0;
+}
+
+.rooms-header {
+    margin: 5px;
+}
+
+table {
+    width: 100%;
+    max-width: 100%;
+    margin: auto;
+}
+
+th {
+    border-bottom: 1px solid white;
+    font-style: normal;
+    font-weight: 1000;
+}
+
+td {
+    text-align: center;
 }
 
 img.mii {
@@ -23,11 +74,41 @@ tr.player-row {
     min-height: 46px;
 }
 
+td {
+    padding: 5px 10px 5px 10px;
+}
+
 td.mii {
     width: 32px;
     min-width: 32px;
 }
 
-td {
-    padding: 5px 10px 5px 10px;
+td.ghost {
+    padding: 0;
+}
+
+tr.closed {
+    display: none;
+}
+
+.arrow {
+    border: solid white;
+    border-width: 0 3px 3px 0;
+    display: inline-block;
+    padding: 3px;
+    vertical-align: bottom;
+    /* default right orientation */
+    transform: rotate(-45deg);
+    -webkit-transform: rotate(-45deg);
+}
+
+.arrow.down {
+    transform: rotate(45deg);
+    -webkit-transform: rotate(45deg);
+}
+
+.scroll {
+    max-width: 100%;
+    overflow: hidden;
+    overflow-x: scroll;
 }

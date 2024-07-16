@@ -4,6 +4,12 @@ function makeTd(contents) {
     return td;
 }
 
+function makeTh(contents) {
+    var th = document.createElement("th");
+    th.innerHTML = contents;
+    return th;
+}
+
 const base64toBlob = function(data) {
     const bytes = atob(data);
     let length = bytes.length;
@@ -70,17 +76,21 @@ function makePlayer(player) {
 function makePlayerInfo(players) {
     var playerCount = 0;
     var ret = document.createElement("tr");
+    ret.classList.add("closed");
+    ret.classList.add("player-info");
+    var ghostTd = document.createElement("td");
+    ghostTd.classList.add("ghost");
+    ret.append(ghostTd);
     var td = document.createElement("td");
-    td.colSpan = 4;
-    ret.style.display = "none";
+    td.colSpan = 5;
 
     var table = document.createElement("table");
     var tHead = document.createElement("thead");
     var tHeadTr = document.createElement("tr");
-    tHeadTr.append(makeTd("Mii"));
-    tHeadTr.append(makeTd("Name"));
-    tHeadTr.append(makeTd("Friend Code"));
-    tHeadTr.append(makeTd("VR"));
+    tHeadTr.append(makeTh("Mii"));
+    tHeadTr.append(makeTh("Name"));
+    tHeadTr.append(makeTh("Friend Code"));
+    tHeadTr.append(makeTh("VR"));
     tHead.append(tHeadTr);
     table.append(tHead);
     var tBody = document.createElement("tbody");
@@ -100,7 +110,9 @@ function makePlayerInfo(players) {
 function makeRoom(room) {
     function pad(num, size) {
         num = num.toString();
-        while (num.length < size) num = "0" + num;
+        while (num.length < size)
+            num = "0" + num;
+
         return num;
     }
 
@@ -109,7 +121,11 @@ function makeRoom(room) {
     var [playerInfo, playerCount] = makePlayerInfo(room.players);
 
     roomInfo.classList.add("collapsible");
+    var arrowTd = document.createElement("td");
+    arrowTd.classList.add("arrow");
+    roomInfo.append(arrowTd);
     roomInfo.append(makeTd(playerCount));
+    roomInfo.append(makeTd(room.rk == "vs_10" ? "VS" : "TT"));
     roomInfo.append(makeTd(room.type));
 
     var timeDiff = Date.now() - new Date(room.created).getTime();
@@ -139,6 +155,7 @@ async function update() {
         return; // TODO: Handle error
 
     var json = await req.json();
+    console.log(json);
 
     var tableBody = document.querySelector("tbody");
     while (tableBody.children.length > 0)
@@ -152,7 +169,7 @@ async function update() {
         playerCount += roomPlayerCount;
     }
 
-    document.querySelector("h3").innerHTML = `Players Online: ${playerCount}`;
+    document.querySelector("h3").innerHTML = `${playerCount} Players Online`;
 
     var collapsibles = document.getElementsByClassName("collapsible");
     for (var e of collapsibles) {
@@ -160,8 +177,12 @@ async function update() {
             var closing = this.classList.contains("active");
             this.classList.toggle("active");
 
+            this.firstChild.classList.toggle("down");
+
             var contents = this.nextSibling;
-            contents.style.display = contents.style.display == "none" ? "" : "none";
+            contents.classList.toggle("closed");
+            contents.classList.toggle("open");
+
             if (closing)
                 return;
 
