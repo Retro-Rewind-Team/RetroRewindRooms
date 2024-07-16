@@ -44,6 +44,9 @@ async function getMii(miiTd) {
 
     var json = await response.json();
 
+    if (!json || !json.mii)
+        return null;
+
     var miiImageUrl = `https://studio.mii.nintendo.com/miis/image.png?data=${json.mii}&type=face&expression=normal&width=270&bgColor=FFFFFF00&clothesColor=default&cameraXRotate=0&cameraYRotate=0&cameraZRotate=0&characterXRotate=0&characterYRotate=0&characterZRotate=0&lightDirectionMode=none&instanceCount=1&instanceRotationMode=model`;
 
     var img = document.createElement("img");
@@ -155,7 +158,6 @@ async function update() {
         return; // TODO: Handle error
 
     var json = await req.json();
-    console.log(json);
 
     var tableBody = document.querySelector("tbody");
     while (tableBody.children.length > 0)
