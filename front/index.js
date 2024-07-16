@@ -127,8 +127,16 @@ function makeRoom(room) {
     var arrowTd = document.createElement("td");
     arrowTd.classList.add("arrow");
     roomInfo.append(arrowTd);
+    var roomType;
+
+    if (!room.rk)
+        roomType = "??";
+    else
+        roomType = room.rk == "vs_10" ? "VS" : "TT";
+
     roomInfo.append(makeTd(playerCount));
-    roomInfo.append(makeTd(room.rk == "vs_10" ? "VS" : "TT"));
+    roomInfo.append(makeTd(roomType));
+    // room.type is actually the access: public or private
     roomInfo.append(makeTd(room.type));
 
     var timeDiff = Date.now() - new Date(room.created).getTime();
