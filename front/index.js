@@ -151,8 +151,10 @@ function makeRoom(room) {
     else
         roomType = room.rk == "vs_10" ? "VS" : "TT";
 
+    var isPublic = room.type == "anybody";
     // room.type is actually the access: public or private
-    roomInfo.append(makeSpan((room.type == "anybody" ? "Public" : "Private") + " "));
+    roomInfo.append(makeSpan(isPublic ? "Public" : "Private", isPublic ? "public" : "private"));
+    roomInfo.append(makeSpan(" "));
     roomInfo.append(makeSpan(`${roomType == "??" ? "" : roomType} Room`));
 
     var timeDiff = Date.now() - new Date(room.created).getTime();
@@ -165,10 +167,13 @@ function makeRoom(room) {
     var seconds = Math.floor(timeDiff / (1000));
     timeDiff -= seconds * (1000);
 
-    roomInfo.append(makeSpan(` - Uptime: ${pad(hours, 2)}:${pad(mins, 2)}:${pad(seconds, 2)}`));
-    roomInfo.append(makeSpan(` - ${room.id}`));
+    roomInfo.append(makeSpan(" - "));
+    roomInfo.append(makeSpan(`Up ${pad(hours, 2)}:${pad(mins, 2)}:${pad(seconds, 2)}`));
+    roomInfo.append(makeSpan(" - "));
+    roomInfo.append(makeSpan(`${room.id}`, "room-id"));
     roomInfo.append(document.createElement("br"));
-    roomInfo.append(makeSpan(`${playerCount} ${playerCount == 1 ? "Player - " : "Players - "}`));
+    roomInfo.append(makeSpan(`${playerCount} ${playerCount == 1 ? "Player" : "Players"}`, "players"));
+    roomInfo.append(makeSpan(" - "));
     var joinable = playerCount != 12;
     roomInfo.append(makeSpan(`${joinable ? "Joinable" : "Not Joinable"}`, joinable ? "joinable" : "not-joinable"));
 
@@ -204,5 +209,18 @@ async function update() {
         roomCount++;
     }
 
-    document.getElementById("player-count").innerHTML = `${playerCount} Players Online Across ${roomCount} Rooms`;
+    var pce = document.getElementById("player-count");
+    pce.innerHTML = playerCount;
+
+    var rce = document.getElementById("room-count");
+    rce.innerHTML = roomCount;
+
+    if (playerCount > 100) {
+        pce.parentElement.classList.add("excited");
+        rce.parentElement.classList.add("excited");
+    }
+    else {
+        pce.parentElement.classList.remove("excited");
+        rce.parentElement.classList.remove("excited");
+    }
 }

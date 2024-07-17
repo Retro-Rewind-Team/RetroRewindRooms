@@ -1,5 +1,7 @@
 @import "fonts.css";
 
+/* Accent colors from catppuccin */
+
 html {
     background-color: #24252d;
     min-height: 100vh + 8px;
@@ -24,12 +26,16 @@ body {
     }
 }
 
+h1 {
+    font-size: 64px;
+}
+
 hr {
     color: white;
 }
 
 .title,
-#player-count,
+#player-count-header,
 .room-info {
     text-align: center;
 }
@@ -40,8 +46,53 @@ hr {
     padding-top: 20px;
 }
 
-#player-count {
+#player-count-header {
+    font-size: 24px;
+    font-weight: 400;
     margin: 0;
+}
+
+.excited {
+    animation-name: excited;
+    animation-delay: 0s;
+    animation-duration: 2s;
+    animation-timing-function: ease-in-out;
+    animation-fill-mode: backwards;
+    animation-iteration-count: infinite;
+}
+
+@keyframes excited {
+    0% {
+        color: #cba6f7;
+    }
+
+    17% {
+        color: #f38ba8;
+    }
+
+    33% {
+        color: #fab387;
+    }
+
+    50% {
+        color: #f9e2af;
+    }
+
+    67% {
+        color: #a6e3a1;
+    }
+
+    83% {
+        color: #89b4fa;
+    }
+
+    100% {
+        color: #cba6f7;
+    }
+}
+
+.count-text {
+    color: #cba6f7;
 }
 
 .room-info {
@@ -49,10 +100,39 @@ hr {
     font-weight: 400;
 }
 
+.room-id {
+    text-decoration: underline;
+}
+
+.joinable {
+    color: #a6e3a1;
+}
+
+.not-joinable {
+    color: #f38ba8;
+}
+
+.public {
+    color: #89dceb;
+}
+
+.private {
+    color: #b4befe
+}
+
+.players {
+    color: #f2cdcd;
+}
+
 table {
     width: 100%;
     max-width: 100%;
     margin: auto;
+    border-collapse: collapse;
+}
+
+tbody tr:nth-child(odd) {
+    background-color: #1f2028;
 }
 
 th {
@@ -63,6 +143,7 @@ th {
 
 td {
     text-align: center;
+    padding: 5px 10px 5px 10px;
 }
 
 img.mii {
@@ -80,10 +161,6 @@ tr.player-row {
     min-height: 46px;
 }
 
-td {
-    padding: 5px 10px 5px 10px;
-}
-
 td.mii {
     width: 32px;
     min-width: 32px;
@@ -95,4 +172,37 @@ tr.closed {
 
 .scroll {
     max-width: 100%;
+}
+
+.footer {
+    padding: 4px;
+    font-family: "proxima-nova", "Helvetica Neue", Helvetica, Arial, Sans-Serif;
+    font-weight: 400;
+}
+
+.footer>ul {
+    padding: 0;
+    padding-top: 10px;
+    list-style: none;
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+a.footer-link {
+    margin-left: 10px;
+    margin-right: 10px;
+}
+
+a.footer-link:link {
+    text-decoration: none;
+    color: #f2cdcd;
+}
+
+a.footer-link:visited {
+    color: #f2cdcd;
+}
+
+a.footer-link:hover {
+    text-decoration: underline;
 }
