@@ -89,6 +89,7 @@ function makePlayer(player) {
     }
     tr.append(makeTd(player.fc));
     tr.append(makeTd(player.ev ? player.ev : "??"));
+    tr.append(makeTd(player.eb ? player.eb : "??"));
 
     return tr;
 }
@@ -103,6 +104,7 @@ function makePlayerInfo(players) {
     tHeadTr.append(makeTh("Name"));
     tHeadTr.append(makeTh("Friend Code"));
     tHeadTr.append(makeTh("VR"));
+    tHeadTr.append(makeTh("BR"));
     tHead.append(tHeadTr);
     table.append(tHead);
     var tBody = document.createElement("tbody");
