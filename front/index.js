@@ -10,58 +10,65 @@ function makeTh(contents) {
     return th;
 }
 
-const base64toBlob = function(data) {
-    const bytes = atob(data);
-    let length = bytes.length;
-    let out = new Uint8Array(length);
+var miiByFc = {};
 
-    while (length--) {
-        out[length] = bytes.charCodeAt(length);
+async function getMiisForPlayerInfo(playerInfo) {
+    function makeImg(mii) {
+        var miiImageUrl = `https://studio.mii.nintendo.com/miis/image.png?data=${mii}&type=face&expression=normal&width=270&bgColor=FFFFFF00&clothesColor=default&cameraXRotate=0&cameraYRotate=0&cameraZRotate=0&characterXRotate=0&characterYRotate=0&characterZRotate=0&lightDirectionMode=none&instanceCount=1&instanceRotationMode=model`;
+
+        var img = document.createElement("img");
+        img.src = miiImageUrl;
+        img.classList.add("mii");
+
+        return img;
     }
 
-    return new Blob([out]);
-};
+    var miiTds = playerInfo.querySelectorAll(".mii");
+    var reqBody = {};
 
-var miisInProgress = [];
+    for (var miiTd of miiTds) {
+        var miiFromFc = miiByFc[miiTd.dataset.fc];
 
-async function getMii(miiTd) {
-    if (miisInProgress.includes(miiTd))
-        return null;
+        if (miiFromFc) {
+            miiTd.append(makeImg(miiFromFc));
+            continue;
+        }
 
-    miisInProgress.push(miiTd);
+        reqBody[miiTd.dataset.fc] = miiTd.dataset.miiData;
+    }
 
-    var formData = new FormData;
-    formData.append("data", base64toBlob(miiTd.dataset.miiData), "mii.dat");
-    formData.append("platform", "wii");
-
-    var response = await fetch("./qrcoderc24/cgi-bin/studio.cgi", {
+    var response = await fetch("./qrcoderc24", {
         method: "POST",
-        body: formData,
+        body: JSON.stringify(reqBody),
+        headers: {
+            "Content-type": "application/json; charset=UTF-8",
+        }
     });
 
     if (!response.ok)
-        return null;
+        return;
 
     var json = await response.json();
 
-    if (!json || !json.mii)
-        return null;
+    if (!json)
+        return;
 
-    var miiImageUrl = `https://studio.mii.nintendo.com/miis/image.png?data=${json.mii}&type=face&expression=normal&width=270&bgColor=FFFFFF00&clothesColor=default&cameraXRotate=0&cameraYRotate=0&cameraZRotate=0&characterXRotate=0&characterYRotate=0&characterZRotate=0&lightDirectionMode=none&instanceCount=1&instanceRotationMode=model`;
+    for (var miiTd of miiTds) {
+        var miiData = json[miiTd.dataset.fc];
 
-    var img = document.createElement("img");
-    img.src = miiImageUrl;
-    img.classList.add("mii");
-
-    return [miiTd, img];
+        if (miiData)
+            miiTd.append(makeImg(miiData));
+    }
 }
 
 function makePlayer(player) {
     var tr = document.createElement("tr");
     tr.classList.add("player-row");
+
     if (player.mii && player.mii[0]) {
         var miiTd = document.createElement("td");
         miiTd.classList.add("mii");
+        miiTd.dataset.fc = player.fc;
         miiTd.dataset.miiData = player.mii[0].data;
         tr.append(miiTd);
         tr.append(makeTd(player.mii[0].name));
@@ -79,7 +86,7 @@ function makePlayer(player) {
 function makePlayerInfo(players) {
     var playerCount = 0;
     var ret = document.createElement("tr");
-    ret.classList.add("closed");
+    ret.classList.add("open");
     ret.classList.add("player-info");
     var ghostTd = document.createElement("td");
     ghostTd.classList.add("ghost");
@@ -122,10 +129,12 @@ function makeRoom(room) {
     var roomInfo = document.createElement("tr");
 
     var [playerInfo, playerCount] = makePlayerInfo(room.players);
+    getMiisForPlayerInfo(playerInfo);
 
     roomInfo.classList.add("collapsible");
     var arrowTd = document.createElement("td");
     arrowTd.classList.add("arrow");
+    arrowTd.classList.add("down");
     roomInfo.append(arrowTd);
     var roomType;
 
@@ -152,6 +161,7 @@ function makeRoom(room) {
     roomInfo.append(makeTd(`${pad(hours, 2)}:${pad(mins, 2)}:${pad(seconds, 2)}`));
     roomInfo.append(makeTd(room.id));
 
+
     return [roomInfo, playerInfo, playerCount];
 }
 
@@ -172,50 +182,26 @@ async function update() {
         tableBody.removeChild(tableBody.lastChild);
 
     var playerCount = 0;
+    var roomCount = 0;
     for (var room of json) {
         var [roomInfo, playerInfo, roomPlayerCount] = makeRoom(room);
         tableBody.append(roomInfo);
         tableBody.append(playerInfo);
         playerCount += roomPlayerCount;
+        roomCount++;
     }
 
-    document.querySelector("h3").innerHTML = `${playerCount} Players Online`;
+    document.querySelector("h3").innerHTML = `${playerCount} Players Online Across ${roomCount} Rooms`;
 
     var collapsibles = document.getElementsByClassName("collapsible");
     for (var e of collapsibles) {
         e.onclick = async function() {
-            var closing = this.classList.contains("active");
             this.classList.toggle("active");
-
             this.firstChild.classList.toggle("down");
 
             var contents = this.nextSibling;
             contents.classList.toggle("closed");
             contents.classList.toggle("open");
-
-            if (closing)
-                return;
-
-            var procMiiResponse = function(miiSpec) {
-                var miiTd = miiSpec[0];
-                var miiImg = miiSpec[1];
-                if (miiTd.children.length != 0 || !miiImg)
-                    return;
-
-                miiTd.append(miiImg);
-            };
-
-            var getMiiTds = [];
-            for (var miiTd of contents.querySelectorAll(".mii")) {
-                if (miiTd.children.length != 0)
-                    continue;
-
-                getMiiTds.push(miiTd);
-            };
-
-            var tasks = getMiiTds.map(getMii);
-            var results = await Promise.all(tasks);
-            results.forEach(procMiiResponse);
         };
     }
 }
