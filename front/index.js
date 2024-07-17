@@ -1,3 +1,13 @@
+function makeSpan(contents, classname) {
+    var span = document.createElement("span");
+    span.innerHTML = contents;
+
+    if (classname)
+        span.classList.add(classname);
+
+    return span;
+}
+
 function makeTd(contents) {
     var td = document.createElement("td");
     td.innerHTML = contents;
@@ -78,21 +88,13 @@ function makePlayer(player) {
         tr.append(makeTd(player.name));
     }
     tr.append(makeTd(player.fc));
-    tr.append(makeTd(player.ev ? player.ev : ""));
+    tr.append(makeTd(player.ev ? player.ev : "??"));
 
     return tr;
 }
 
 function makePlayerInfo(players) {
     var playerCount = 0;
-    var ret = document.createElement("tr");
-    ret.classList.add("open");
-    ret.classList.add("player-info");
-    var ghostTd = document.createElement("td");
-    ghostTd.classList.add("ghost");
-    ret.append(ghostTd);
-    var td = document.createElement("td");
-    td.colSpan = 5;
 
     var table = document.createElement("table");
     var tHead = document.createElement("thead");
@@ -106,15 +108,12 @@ function makePlayerInfo(players) {
     var tBody = document.createElement("tbody");
     table.append(tBody);
 
-    td.append(table);
-    ret.append(td);
-
     for (var id in players) {
         tBody.append(makePlayer(players[id]));
         playerCount++;
     }
 
-    return [ret, playerCount];
+    return [table, playerCount];
 }
 
 function makeRoom(room) {
@@ -126,16 +125,12 @@ function makeRoom(room) {
         return num;
     }
 
-    var roomInfo = document.createElement("tr");
+    var roomInfo = document.createElement("h3");
+    roomInfo.classList.add("room-info");
 
     var [playerInfo, playerCount] = makePlayerInfo(room.players);
     getMiisForPlayerInfo(playerInfo);
 
-    roomInfo.classList.add("collapsible");
-    var arrowTd = document.createElement("td");
-    arrowTd.classList.add("arrow");
-    arrowTd.classList.add("down");
-    roomInfo.append(arrowTd);
     var roomType;
 
     if (!room.rk)
@@ -143,10 +138,9 @@ function makeRoom(room) {
     else
         roomType = room.rk == "vs_10" ? "VS" : "TT";
 
-    roomInfo.append(makeTd(playerCount));
-    roomInfo.append(makeTd(roomType));
     // room.type is actually the access: public or private
-    roomInfo.append(makeTd(room.type));
+    roomInfo.append(makeSpan((room.type == "anybody" ? "Public" : "Private") + " "));
+    roomInfo.append(makeSpan(`${roomType == "??" ? "" : roomType} Room`));
 
     var timeDiff = Date.now() - new Date(room.created).getTime();
     var hours = Math.floor(timeDiff / (1000 * 60 * 60));
@@ -158,9 +152,12 @@ function makeRoom(room) {
     var seconds = Math.floor(timeDiff / (1000));
     timeDiff -= seconds * (1000);
 
-    roomInfo.append(makeTd(`${pad(hours, 2)}:${pad(mins, 2)}:${pad(seconds, 2)}`));
-    roomInfo.append(makeTd(room.id));
-
+    roomInfo.append(makeSpan(` - Uptime: ${pad(hours, 2)}:${pad(mins, 2)}:${pad(seconds, 2)}`));
+    roomInfo.append(makeSpan(` - ${room.id}`));
+    roomInfo.append(document.createElement("br"));
+    roomInfo.append(makeSpan(`${playerCount} ${playerCount == 1 ? "Player - " : "Players - "}`));
+    var joinable = playerCount != 12;
+    roomInfo.append(makeSpan(`${joinable ? "Joinable" : "Not Joinable"}`, joinable ? "joinable" : "not-joinable"));
 
     return [roomInfo, playerInfo, playerCount];
 }
@@ -177,31 +174,22 @@ async function update() {
 
     var json = await req.json();
 
-    var tableBody = document.querySelector("tbody");
-    while (tableBody.children.length > 0)
-        tableBody.removeChild(tableBody.lastChild);
+    var div = document.querySelector("div.scroll");
+    while (div.children.length > 0)
+        div.removeChild(div.lastChild);
 
     var playerCount = 0;
     var roomCount = 0;
     for (var room of json) {
         var [roomInfo, playerInfo, roomPlayerCount] = makeRoom(room);
-        tableBody.append(roomInfo);
-        tableBody.append(playerInfo);
+        div.append(roomInfo);
+        div.append(playerInfo);
+        var hrDiv = document.createElement("div");
+        hrDiv.append(document.createElement("hr"));
+        div.append(hrDiv);
         playerCount += roomPlayerCount;
         roomCount++;
     }
 
-    document.querySelector("h3").innerHTML = `${playerCount} Players Online Across ${roomCount} Rooms`;
-
-    var collapsibles = document.getElementsByClassName("collapsible");
-    for (var e of collapsibles) {
-        e.onclick = async function() {
-            this.classList.toggle("active");
-            this.firstChild.classList.toggle("down");
-
-            var contents = this.nextSibling;
-            contents.classList.toggle("closed");
-            contents.classList.toggle("open");
-        };
-    }
+    document.getElementById("player-count").innerHTML = `${playerCount} Players Online Across ${roomCount} Rooms`;
 }

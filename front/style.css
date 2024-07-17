@@ -24,8 +24,8 @@ hr {
 }
 
 .title,
-.player-count,
-.rooms-header {
+#player-count,
+.room-info {
     text-align: center;
 }
 
@@ -35,12 +35,13 @@ hr {
     padding-top: 20px;
 }
 
-.player-count {
+#player-count {
     margin: 0;
 }
 
-.rooms-header {
-    margin: 5px;
+.room-info {
+    font-size: 24px;
+    font-weight: 400;
 }
 
 table {
@@ -83,28 +84,8 @@ td.mii {
     min-width: 32px;
 }
 
-td.ghost {
-    padding: 0;
-}
-
 tr.closed {
     display: none;
-}
-
-.arrow {
-    border: solid white;
-    border-width: 0 3px 3px 0;
-    display: inline-block;
-    padding: 3px;
-    vertical-align: bottom;
-    /* default right orientation */
-    transform: rotate(-45deg);
-    -webkit-transform: rotate(-45deg);
-}
-
-.arrow.down {
-    transform: rotate(45deg);
-    -webkit-transform: rotate(45deg);
 }
 
 .scroll {
