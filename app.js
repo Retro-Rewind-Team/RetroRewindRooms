@@ -16,6 +16,7 @@ app.use((_, res, next) => {
     next();
 });
 
+// Holds the b64 img data
 var responseByFc = {};
 
 const base64toBlob = function(data) {
@@ -29,6 +30,20 @@ const base64toBlob = function(data) {
 
     return new Blob([out]);
 };
+
+async function fetchImgAsBase64(url) {
+    try {
+        var response = await fetch(url);
+
+        if (!response.ok)
+            return null;
+
+        return btoa(String.fromCharCode(...new Uint8Array(await response.arrayBuffer())));
+    }
+    catch {
+        return null;
+    }
+}
 
 async function getMii(miiSpec) {
     var fc = miiSpec[0];
@@ -53,9 +68,13 @@ async function getMii(miiSpec) {
         if (!json || !json.mii)
             return [fc, null];
 
-        responseByFc[fc] = json.mii;
+        var miiImageUrl = `https://studio.mii.nintendo.com/miis/image.png?data=${json.mii}&type=face&expression=normal&width=270&bgColor=FFFFFF00&clothesColor=default&cameraXRotate=0&cameraYRotate=0&cameraZRotate=0&characterXRotate=0&characterYRotate=0&characterZRotate=0&lightDirectionMode=none&instanceCount=1&instanceRotationMode=model`;
 
-        return [fc, json.mii];
+        var b64 = await fetchImgAsBase64(miiImageUrl);
+
+        responseByFc[fc] = b64;
+
+        return [fc, b64];
     }
     catch {
         return [fc, null];

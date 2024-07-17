@@ -23,11 +23,17 @@ function makeTh(contents) {
 var miiByFc = {};
 
 async function getMiisForPlayerInfo(playerInfo) {
-    function makeImg(mii) {
-        var miiImageUrl = `https://studio.mii.nintendo.com/miis/image.png?data=${mii}&type=face&expression=normal&width=270&bgColor=FFFFFF00&clothesColor=default&cameraXRotate=0&cameraYRotate=0&cameraZRotate=0&characterXRotate=0&characterYRotate=0&characterZRotate=0&lightDirectionMode=none&instanceCount=1&instanceRotationMode=model`;
+    function isEmpty(obj) {
+        for (const prop in obj)
+            if (Object.hasOwn(obj, prop))
+                return false;
 
+        return true;
+    }
+
+    function makeImg(imgb64) {
         var img = document.createElement("img");
-        img.src = miiImageUrl;
+        img.src = `data:image/png;base64,${imgb64}`;
         img.classList.add("mii");
 
         return img;
@@ -46,6 +52,9 @@ async function getMiisForPlayerInfo(playerInfo) {
 
         reqBody[miiTd.dataset.fc] = miiTd.dataset.miiData;
     }
+
+    if (isEmpty(reqBody))
+        return;
 
     var response = await fetch("./qrcoderc24", {
         method: "POST",
@@ -66,8 +75,10 @@ async function getMiisForPlayerInfo(playerInfo) {
     for (var miiTd of miiTds) {
         var miiData = json[miiTd.dataset.fc];
 
-        if (miiData)
+        if (miiData) {
+            miiByFc[miiTd.dataset.fc] = miiData;
             miiTd.append(makeImg(miiData));
+        }
     }
 }
 
