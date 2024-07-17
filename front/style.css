@@ -17,6 +17,11 @@ body {
     body {
         width: 100%;
     }
+
+    .scroll {
+        overflow: hidden;
+        overflow-x: scroll;
+    }
 }
 
 hr {
@@ -90,6 +95,4 @@ tr.closed {
 
 .scroll {
     max-width: 100%;
-    overflow: hidden;
-    overflow-x: scroll;
 }
