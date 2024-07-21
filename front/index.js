@@ -129,7 +129,9 @@ function makePlayerInfo(players) {
     return [table, playerCount];
 }
 
-function makeRoom(room) {
+var roomUpSpans = [];
+
+function formatUptime(dateCreated) {
     function pad(num, size) {
         num = num.toString();
         while (num.length < size)
@@ -138,26 +140,7 @@ function makeRoom(room) {
         return num;
     }
 
-    var roomInfo = document.createElement("h3");
-    roomInfo.classList.add("room-info");
-
-    var [playerInfo, playerCount] = makePlayerInfo(room.players);
-    getMiisForPlayerInfo(playerInfo);
-
-    var roomType;
-
-    if (!room.rk)
-        roomType = "??";
-    else
-        roomType = room.rk == "vs_10" ? "VS" : "TT";
-
-    var isPublic = room.type == "anybody";
-    // room.type is actually the access: public or private
-    roomInfo.append(makeSpan(isPublic ? "Public" : "Private", isPublic ? "public" : "private"));
-    roomInfo.append(makeSpan(" "));
-    roomInfo.append(makeSpan(`${roomType == "??" ? "" : roomType} Room`));
-
-    var timeDiff = Date.now() - new Date(room.created).getTime();
+    var timeDiff = Date.now() - dateCreated.getTime();
     var hours = Math.floor(timeDiff / (1000 * 60 * 60));
     timeDiff -= hours * (1000 * 60 * 60);
 
@@ -167,8 +150,40 @@ function makeRoom(room) {
     var seconds = Math.floor(timeDiff / (1000));
     timeDiff -= seconds * (1000);
 
+    return `${pad(hours, 2)}:${pad(mins, 2)}:${pad(seconds, 2)}`;
+}
+
+function makeRoom(room) {
+    var roomInfo = document.createElement("h3");
+    roomInfo.classList.add("room-info");
+
+    var [playerInfo, playerCount] = makePlayerInfo(room.players);
+    getMiisForPlayerInfo(playerInfo);
+
+    var roomType;
+
+    if (room.rk == "vs_10" || room.rk == "vs_751")
+        roomType = "VS";
+    else if (room.rk == "vs_11")
+        roomType = "TT";
+    else
+        roomType = "??";
+
+    var isPublic = room.type == "anybody";
+    // room.type is actually the access: public or private
+    roomInfo.append(makeSpan(isPublic ? "Public" : "Private", isPublic ? "public" : "private"));
+    roomInfo.append(makeSpan(" "));
+    roomInfo.append(makeSpan(`${roomType == "??" ? "" : roomType} Room`));
     roomInfo.append(makeSpan(" - "));
-    roomInfo.append(makeSpan(`Up ${pad(hours, 2)}:${pad(mins, 2)}:${pad(seconds, 2)}`));
+    roomInfo.append(makeSpan("Up "));
+
+    var dateCreated = new Date(room.created);
+    var upSpan = document.createElement("span");
+    upSpan.dataset.created = dateCreated;
+    upSpan.innerHTML = formatUptime(dateCreated);
+    roomUpSpans.push(upSpan);
+
+    roomInfo.append(upSpan);
     roomInfo.append(makeSpan(" - "));
     roomInfo.append(makeSpan(`${room.id}`, "room-id"));
     roomInfo.append(document.createElement("br"));
@@ -195,6 +210,8 @@ async function update() {
     var div = document.querySelector("div.scroll");
     while (div.children.length > 0)
         div.removeChild(div.lastChild);
+
+    roomUpSpans = [];
 
     var playerCount = 0;
     var roomCount = 0;
@@ -224,3 +241,13 @@ async function update() {
         rce.parentElement.classList.remove("excited");
     }
 }
+
+setInterval(() => {
+    if (!roomUpSpans)
+        return;
+
+    for (var idx in roomUpSpans) {
+        var span = roomUpSpans[idx];
+        span.innerHTML = formatUptime(new Date(span.dataset.created));
+    }
+}, 1000);
