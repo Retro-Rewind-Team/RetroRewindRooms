@@ -20,7 +20,34 @@ function makeTh(contents) {
     return th;
 }
 
+function pad(num, size) {
+    num = num.toString();
+    while (num.length < size)
+        num = "0" + num;
+
+    return num;
+}
+
+function formatUptime(startDate, endDate) {
+    var timeDiff = endDate.getTime() - startDate.getTime();
+    var hours = Math.floor(timeDiff / (1000 * 60 * 60));
+    timeDiff -= hours * (1000 * 60 * 60);
+
+    var mins = Math.floor(timeDiff / (1000 * 60));
+    timeDiff -= mins * (1000 * 60);
+
+    var seconds = Math.floor(timeDiff / (1000));
+    timeDiff -= seconds * (1000);
+
+    return `${pad(hours, 2)}:${pad(mins, 2)}:${pad(seconds, 2)}`;
+}
+
+var roomUpSpans = [];
 var miiByFc = {};
+var maxId;
+var currentId;
+var minId;
+var json_by_id = {};
 
 async function getMiisForPlayerInfo(playerInfo) {
     function isEmpty(obj) {
@@ -129,30 +156,6 @@ function makePlayerInfo(players) {
     return [table, playerCount];
 }
 
-var roomUpSpans = [];
-
-function formatUptime(dateCreated) {
-    function pad(num, size) {
-        num = num.toString();
-        while (num.length < size)
-            num = "0" + num;
-
-        return num;
-    }
-
-    var timeDiff = Date.now() - dateCreated.getTime();
-    var hours = Math.floor(timeDiff / (1000 * 60 * 60));
-    timeDiff -= hours * (1000 * 60 * 60);
-
-    var mins = Math.floor(timeDiff / (1000 * 60));
-    timeDiff -= mins * (1000 * 60);
-
-    var seconds = Math.floor(timeDiff / (1000));
-    timeDiff -= seconds * (1000);
-
-    return `${pad(hours, 2)}:${pad(mins, 2)}:${pad(seconds, 2)}`;
-}
-
 function makeRoom(room) {
     var roomInfo = document.createElement("h3");
     roomInfo.classList.add("room-info");
@@ -180,7 +183,8 @@ function makeRoom(room) {
     var dateCreated = new Date(room.created);
     var upSpan = document.createElement("span");
     upSpan.dataset.created = dateCreated;
-    upSpan.innerHTML = formatUptime(dateCreated);
+    upSpan.innerHTML = formatUptime(dateCreated, currentId == maxId ? new Date(Date.now()) : new Date(json_by_id[currentId].timestamp));
+    upSpan.classList.add("upspan");
     roomUpSpans.push(upSpan);
 
     roomInfo.append(upSpan);
@@ -195,17 +199,9 @@ function makeRoom(room) {
     return [roomInfo, playerInfo, playerCount];
 }
 
-// eslint-disable-next-line no-unused-vars
-async function update() {
-    // 5 minutes
-    setTimeout(update, 300000);
-
-    var req = await fetch("./zplwii/api/groups");
-
-    if (!req.ok)
-        return; // TODO: Handle error
-
-    var json = await req.json();
+async function update(json) {
+    if (!json)
+        return;
 
     var div = document.querySelector("div.scroll");
     while (div.children.length > 0)
@@ -215,7 +211,7 @@ async function update() {
 
     var playerCount = 0;
     var roomCount = 0;
-    for (var room of json) {
+    for (var room of json.rooms) {
         var [roomInfo, playerInfo, roomPlayerCount] = makeRoom(room);
         div.append(roomInfo);
         div.append(playerInfo);
@@ -240,14 +236,118 @@ async function update() {
         pce.parentElement.classList.remove("excited");
         rce.parentElement.classList.remove("excited");
     }
+
+    var date = new Date(json.timestamp);
+    document.getElementById("fetch-timestamp").innerHTML = `Data ID ${currentId} Fetched At ${pad(date.getHours(), 2)}:${pad(date.getMinutes(), 2)}:${pad(date.getSeconds(), 2)}`;
 }
 
+async function getRooms(id) {
+    // TODO: This function sucks
+    function updateButtons() {
+        var forwards = document.getElementById("forwards");
+        var megaForwards = document.getElementById("mega-forwards");
+        var backwards = document.getElementById("backwards");
+        var megaBackwards = document.getElementById("mega-backwards");
+
+        if (currentId == maxId) {
+            forwards.classList.remove("active");
+            megaForwards.classList.remove("active");
+        }
+
+        if (currentId == minId) {
+            backwards.classList.remove("active");
+            megaBackwards.classList.remove("active");
+        }
+
+        if (currentId != maxId) {
+            forwards.classList.add("active");
+            megaForwards.classList.add("active");
+        }
+
+        if (currentId != minId) {
+            backwards.classList.add("active");
+            megaBackwards.classList.add("active");
+        }
+    }
+
+    console.log(`fetching rooms with ${id != null ? `id ${id}` : "the latest id"}`);
+
+    if (id) {
+        var json = json_by_id[id];
+
+        if (json) {
+            currentId = json.id;
+            updateButtons();
+
+            return json;
+        }
+    }
+
+    var req = await fetch(`./groups${id != null ? `?id=${id}` : ""}`);
+
+    if (!req.ok)
+        return null; // TODO: Handle error
+
+    var json = await req.json();
+
+    if (!json)
+        return null;
+
+    json_by_id[json.id] = json;
+    minId = json.minimum_id;
+
+    if (currentId == maxId || id != null)
+        currentId = json.id;
+
+    if (id == null)
+        maxId = json.id;
+
+    updateButtons();
+
+    return json;
+}
+
+// eslint-disable-next-line no-unused-vars
+async function forwards(mega) {
+    if (mega && currentId != maxId)
+        update(await getRooms(maxId));
+    else if (currentId + 1 <= maxId)
+        update(await getRooms(currentId + 1));
+}
+
+// eslint-disable-next-line no-unused-vars
+async function backwards(mega) {
+    var realMin = Math.min(minId, maxId - Object.keys(json_by_id).length + 1);
+
+    if (mega && currentId != realMin)
+        update(await getRooms(realMin));
+    else if (currentId - 1 >= realMin)
+        update(await getRooms(currentId - 1));
+}
+
+// eslint-disable-next-line no-unused-vars
+async function init() {
+    update(await getRooms());
+}
+
+// 1 minute
+setInterval(async () => {
+    var json = await getRooms();
+
+    // If you're not on the most curren page, you don't get whisked away
+    if (currentId == maxId)
+        update(json);
+}, 60000);
+
 setInterval(() => {
+    if (currentId != maxId)
+        return;
+
     if (!roomUpSpans)
         return;
 
     for (var idx in roomUpSpans) {
         var span = roomUpSpans[idx];
-        span.innerHTML = formatUptime(new Date(span.dataset.created));
+        span.innerHTML = formatUptime(new Date(span.dataset.created), new Date(Date.now()));
     }
 }, 1000);

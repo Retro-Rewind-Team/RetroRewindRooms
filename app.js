@@ -16,6 +16,9 @@ app.use((_, res, next) => {
     next();
 });
 
+// Hold cached responses from zplwii.xyz/api/groups
+var groupResponses = [];
+
 // Holds the b64 img data
 var responseByFc = {};
 
@@ -117,7 +120,70 @@ app.post("/qrcoderc24", async function(req, res) {
     res.send(JSON.stringify(resBody));
 });
 
-app.use("/zplwii", proxy("zplwii.xyz", { parseReqBody: false }));
+app.get("/groups", function(req, res) {
+    var id = groupResponses[groupResponses.length - 1].id;
+
+    if (req.query.id) {
+        id = parseInt(req.query.id, 10);
+
+        if (id == NaN) {
+            res.sendStatus(400);
+            return;
+        }
+    }
+
+    var idx = id - groupResponses[0].id;
+
+    if (idx < 0 || idx > 60) {
+        res.status(400);
+        res.send(`Response does not exist for id ${id}, is your id too far back?`);
+        return;
+    }
+
+    var response = groupResponses[idx];
+    if (!response) {
+        res.status(404);
+        res.send(`Response does not exist for id ${id}, but it should. Is zplwii.xyz down or is it just not populated yet?`);
+        return;
+    }
+
+    // Minimum allowed id at a given time
+    response.minimum_id = groupResponses[0].id;
+
+    res.set({
+        ["Cache-Control"]: "no-cache, no-store, must-revalidate",
+        ["Expires"]: 0,
+    });
+    res.send(JSON.stringify(response));
+});
+
+var id = 0;
+async function updateGroups() {
+    try {
+        var response = await fetch("http://zplwii.xyz/api/groups");
+
+        if (!response.ok) {
+            console.error("Failed to retrieve groups!");
+            return;
+        }
+
+        var len = groupResponses.push({ timestamp: Date.now(), rooms: await response.json(), id: id });
+        console.log(`Successfully queried groups: Time is ${new Date(Date.now())}, id is ${id}`);
+
+        id++;
+
+        if (len > 60)
+            groupResponses.shift();
+    }
+    catch (e) {
+        console.error(e);
+    }
+}
+
+// Once a minute
+setInterval(updateGroups, 60000);
+// Initial call
+updateGroups();
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`listening on ${PORT}`));

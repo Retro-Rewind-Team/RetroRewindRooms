@@ -24,6 +24,14 @@ body {
         overflow: hidden;
         overflow-x: scroll;
     }
+
+    #backwards {
+        margin-left: 2ch;
+    }
+
+    #forwards {
+        margin-right: 2ch;
+    }
 }
 
 h1 {
@@ -34,22 +42,66 @@ hr {
     color: white;
 }
 
-.title,
-#player-count-header,
-.room-info {
-    text-align: center;
-}
-
 .title {
     margin-top: 0px;
     margin-bottom: 0px;
     padding-top: 20px;
+    text-align: center;
 }
 
 #player-count-header {
     font-size: 24px;
     font-weight: 400;
     margin: 0;
+    text-align: center;
+}
+
+#fetch-info {
+    text-align: center;
+    margin-top: 8px;
+    margin-bottom: 0;
+    font-weight: 400;
+}
+
+#fetch-timestamp {
+    float: none;
+}
+
+.cycle-button {
+    background: none;
+    border: none;
+    font-weight: 900;
+    color: #45475a;
+}
+
+.cycle-button.active {
+    color: #f2cdcd;
+}
+
+.cycle-button.active:hover {
+    text-decoration: underline;
+}
+
+#mega-backwards,
+#backwards {
+    float: left;
+}
+
+#backwards {
+    margin-left: 1ch;
+}
+
+#mega-forwards,
+#forwards {
+    float: right;
+}
+
+#forwards {
+    margin-right: 1ch;
+}
+
+.upspan {
+    font-variant-numeric: tabular-nums;
 }
 
 .excited {
@@ -98,6 +150,7 @@ hr {
 .room-info {
     font-size: 24px;
     font-weight: 400;
+    text-align: center;
 }
 
 .room-id {

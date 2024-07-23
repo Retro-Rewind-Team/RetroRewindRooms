@@ -9,7 +9,7 @@
 
     <script type="text/javascript">
         document.addEventListener("DOMContentLoaded", () => {
-            update();
+            init();
         });
     </script>
 </head>
@@ -25,6 +25,14 @@
             <Span id="room-count">??</Span> Rooms
         </Span>
     </h3>
+
+    <h4 id="fetch-info">
+        <button id="mega-backwards" class="cycle-button active" onclick="backwards(true)">&lt;&lt;</button>
+        <button id="backwards" class="cycle-button active" onclick="backwards()">&lt;</button>
+        <span id="fetch-timestamp">Data ID ?? Fetched At ??</span>
+        <button id="mega-forwards" class="cycle-button" onclick="forwards(true)">&gt;&gt;</button>
+        <button id="forwards" class="cycle-button" onclick="forwards()">&gt;</button>
+    </h4>
     <div>
         <hr />
     </div>
@@ -35,10 +43,10 @@
         <ul>
             <li><a class="footer-link" href="https://wiki.tockdom.com/wiki/Retro_Rewind">Retro Rewind</a></li>
             <li><a class="footer-link" href="https://www.fontsquirrel.com/fonts/rubik">Rubik Font</a></li>
-            <li><a class="footer-link" href="https://wiki.tockdom.com/wiki/CTMKF">Chadderz' Terrible Mario Kart Font</a>
+            <li><a class="footer-link" href="https://wiki.tockdom.com/wiki/CTMKF">Chadderz' Terrible Mario Kart
+                    Font</a>
             <li><a class="footer-link" href="http://zplwii.xyz/api/groups">API Endpoint</a></li>
             <li><a class="footer-link" href="https://github.com/ppebb/RetroRewindRooms">Page Source</a></li>
-            </li>
         </ul>
     </div>
 
