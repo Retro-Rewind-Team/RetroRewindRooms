@@ -1,5 +1,4 @@
 var express = require("express");
-var proxy = require("express-http-proxy");
 
 const app = express();
 app.use(express.json());
@@ -158,25 +157,35 @@ app.get("/groups", function(req, res) {
 });
 
 var id = 0;
+function updateCachedGroups(response) {
+    var len = groupResponses.push({ timestamp: Date.now(), rooms: response, id: id });
+    console.log(`Updated groups (${response != null ? "successfully" : "unsuccessfully"}): Time is ${new Date(Date.now())}, id is ${id}`);
+
+    id++;
+
+    if (len > 60)
+        groupResponses.shift();
+}
+
 async function updateGroups() {
     try {
         var response = await fetch("http://zplwii.xyz/api/groups");
 
-        if (!response.ok) {
+        var json = null;
+
+        if (!response.ok)
             console.error("Failed to retrieve groups!");
-            return;
-        }
+        else
+            json = await response.json();
 
-        var len = groupResponses.push({ timestamp: Date.now(), rooms: await response.json(), id: id });
-        console.log(`Successfully queried groups: Time is ${new Date(Date.now())}, id is ${id}`);
+        if (Object.keys(json).length === 0 && json.constructor === Array)
+            json = null;
 
-        id++;
-
-        if (len > 60)
-            groupResponses.shift();
+        updateCachedGroups(json);
     }
     catch (e) {
         console.error(e);
+        updateCachedGroups(null);
     }
 }
 

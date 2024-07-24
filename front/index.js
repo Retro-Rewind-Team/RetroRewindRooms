@@ -203,6 +203,8 @@ async function update(json) {
     if (!json)
         return;
 
+    var hasData = !!json.rooms;
+
     var div = document.querySelector("div.scroll");
     while (div.children.length > 0)
         div.removeChild(div.lastChild);
@@ -211,22 +213,32 @@ async function update(json) {
 
     var playerCount = 0;
     var roomCount = 0;
-    for (var room of json.rooms) {
-        var [roomInfo, playerInfo, roomPlayerCount] = makeRoom(room);
-        div.append(roomInfo);
-        div.append(playerInfo);
+
+    if (hasData) {
+        for (var room of json.rooms) {
+            var [roomInfo, playerInfo, roomPlayerCount] = makeRoom(room);
+            div.append(roomInfo);
+            div.append(playerInfo);
+            var hrDiv = document.createElement("div");
+            hrDiv.append(document.createElement("hr"));
+            div.append(hrDiv);
+            playerCount += roomPlayerCount;
+            roomCount++;
+        }
+    }
+    else {
         var hrDiv = document.createElement("div");
         hrDiv.append(document.createElement("hr"));
         div.append(hrDiv);
-        playerCount += roomPlayerCount;
-        roomCount++;
     }
 
     var pce = document.getElementById("player-count");
-    pce.innerHTML = playerCount;
+    pce.innerHTML = hasData ? playerCount : "??";
 
     var rce = document.getElementById("room-count");
-    rce.innerHTML = roomCount;
+    rce.innerHTML = hasData ? roomCount : "??";
+
+    document.getElementById("no-data").style.display = hasData ? "none" : "";
 
     if (playerCount > 100) {
         pce.parentElement.classList.add("excited");
