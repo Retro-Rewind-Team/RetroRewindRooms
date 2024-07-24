@@ -178,9 +178,6 @@ async function updateGroups() {
         else
             json = await response.json();
 
-        if (Object.keys(json).length === 0 && json.constructor === Array)
-            json = null;
-
         updateCachedGroups(json);
     }
     catch (e) {
