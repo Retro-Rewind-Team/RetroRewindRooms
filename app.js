@@ -1,6 +1,6 @@
-var express = require("express");
+const express = require("express");
 
-const app = express();
+var app = express();
 app.use(express.json());
 
 app.use(express.urlencoded({ extended: true }));
@@ -16,10 +16,10 @@ app.use((_, res, next) => {
 });
 
 // Hold cached responses from zplwii.xyz/api/groups
-var groupResponses = [];
+const groupResponses = [];
 
 // Holds the b64 img data
-var responseByFc = {};
+const responseByFc = {};
 
 const base64toBlob = function(data) {
     const bytes = atob(data);
@@ -35,7 +35,7 @@ const base64toBlob = function(data) {
 
 async function fetchImgAsBase64(url) {
     try {
-        var response = await fetch(url);
+        const response = await fetch(url);
 
         if (!response.ok)
             return null;
@@ -48,16 +48,16 @@ async function fetchImgAsBase64(url) {
 }
 
 async function getMii(miiSpec) {
-    var fc = miiSpec[0];
-    var data = miiSpec[1];
+    const fc = miiSpec[0];
+    const data = miiSpec[1];
 
-    var formData = new FormData;
+    const formData = new FormData;
     formData.append("data", base64toBlob(data), "mii.dat");
     formData.append("platform", "wii");
 
     try {
         // fc is used to cache responses on the server
-        var response = await fetch("https://qrcode.rc24.xyz/cgi-bin/studio.cgi", {
+        const response = await fetch("https://qrcode.rc24.xyz/cgi-bin/studio.cgi", {
             method: "POST",
             body: formData,
         });
@@ -65,14 +65,14 @@ async function getMii(miiSpec) {
         if (!response.ok)
             return [fc, null];
 
-        var json = await response.json();
+        const json = await response.json();
 
         if (!json || !json.mii)
             return [fc, null];
 
-        var miiImageUrl = `https://studio.mii.nintendo.com/miis/image.png?data=${json.mii}&type=face&expression=normal&width=270&bgColor=FFFFFF00&clothesColor=default&cameraXRotate=0&cameraYRotate=0&cameraZRotate=0&characterXRotate=0&characterYRotate=0&characterZRotate=0&lightDirectionMode=none&instanceCount=1&instanceRotationMode=model`;
+        const miiImageUrl = `https://studio.mii.nintendo.com/miis/image.png?data=${json.mii}&type=face&expression=normal&width=270&bgColor=FFFFFF00&clothesColor=default&cameraXRotate=0&cameraYRotate=0&cameraZRotate=0&characterXRotate=0&characterYRotate=0&characterZRotate=0&lightDirectionMode=none&instanceCount=1&instanceRotationMode=model`;
 
-        var b64 = await fetchImgAsBase64(miiImageUrl);
+        const b64 = await fetchImgAsBase64(miiImageUrl);
 
         responseByFc[fc] = b64;
 
@@ -89,14 +89,14 @@ app.post("/qrcoderc24", async function(req, res) {
         return;
     }
 
-    var resBody = {};
-    var reqsToMake = [];
+    const resBody = {};
+    const reqsToMake = [];
 
-    for (var fc in req.body) {
+    for (const fc in req.body) {
         if (!req.body.hasOwnProperty(fc))
             continue;
 
-        var cached = responseByFc[fc];
+        const cached = responseByFc[fc];
 
         if (cached) {
             resBody[fc] = cached;
@@ -111,8 +111,8 @@ app.post("/qrcoderc24", async function(req, res) {
     }
 
     if (reqsToMake.length != 0) {
-        var tasks = reqsToMake.map(getMii);
-        var resp = await Promise.all(tasks);
+        const tasks = reqsToMake.map(getMii);
+        const resp = await Promise.all(tasks);
         resp.forEach(procMiiResponse);
     }
 
@@ -125,13 +125,15 @@ app.get("/groups", function(req, res) {
     if (req.query.id) {
         id = parseInt(req.query.id, 10);
 
-        if (id == NaN) {
+        if (req.query.id == "min")
+            id = groupResponses[0].id;
+        else if (id == NaN) {
             res.sendStatus(400);
             return;
         }
     }
 
-    var idx = id - groupResponses[0].id;
+    const idx = id - groupResponses[0].id;
 
     if (idx < 0 || idx > 60) {
         res.status(400);
@@ -139,7 +141,7 @@ app.get("/groups", function(req, res) {
         return;
     }
 
-    var response = groupResponses[idx];
+    const response = groupResponses[idx];
     if (!response) {
         res.status(404);
         res.send(`Response does not exist for id ${id}, but it should. Is zplwii.xyz down or is it just not populated yet?`);
@@ -158,7 +160,7 @@ app.get("/groups", function(req, res) {
 
 var id = 0;
 function updateCachedGroups(response) {
-    var len = groupResponses.push({ timestamp: Date.now(), rooms: response, id: id });
+    const len = groupResponses.push({ timestamp: Date.now(), rooms: response, id: id });
     console.log(`Updated groups (${response != null ? "successfully" : "unsuccessfully"}): Time is ${new Date(Date.now())}, id is ${id}`);
 
     id++;
@@ -169,7 +171,7 @@ function updateCachedGroups(response) {
 
 async function updateGroups() {
     try {
-        var response = await fetch("http://zplwii.xyz/api/groups");
+        const response = await fetch("http://zplwii.xyz/api/groups");
 
         var json = null;
 

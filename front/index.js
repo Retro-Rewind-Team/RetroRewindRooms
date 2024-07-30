@@ -1,5 +1,5 @@
 function makeSpan(contents, classname) {
-    var span = document.createElement("span");
+    const span = document.createElement("span");
     span.innerHTML = contents;
 
     if (classname)
@@ -9,13 +9,13 @@ function makeSpan(contents, classname) {
 }
 
 function makeTd(contents) {
-    var td = document.createElement("td");
+    const td = document.createElement("td");
     td.innerHTML = contents;
     return td;
 }
 
 function makeTh(contents) {
-    var th = document.createElement("th");
+    const th = document.createElement("th");
     th.innerHTML = contents;
     return th;
 }
@@ -30,24 +30,24 @@ function pad(num, size) {
 
 function formatUptime(startDate, endDate) {
     var timeDiff = endDate.getTime() - startDate.getTime();
-    var hours = Math.floor(timeDiff / (1000 * 60 * 60));
+    const hours = Math.floor(timeDiff / (1000 * 60 * 60));
     timeDiff -= hours * (1000 * 60 * 60);
 
-    var mins = Math.floor(timeDiff / (1000 * 60));
+    const mins = Math.floor(timeDiff / (1000 * 60));
     timeDiff -= mins * (1000 * 60);
 
-    var seconds = Math.floor(timeDiff / (1000));
+    const seconds = Math.floor(timeDiff / (1000));
     timeDiff -= seconds * (1000);
 
     return `${pad(hours, 2)}:${pad(mins, 2)}:${pad(seconds, 2)}`;
 }
 
 var roomUpSpans = [];
-var miiByFc = {};
+const miiByFc = {};
 var maxId;
 var currentId;
 var minId;
-var json_by_id = {};
+const json_by_id = {};
 
 async function getMiisForPlayerInfo(playerInfo) {
     function isEmpty(obj) {
@@ -59,18 +59,18 @@ async function getMiisForPlayerInfo(playerInfo) {
     }
 
     function makeImg(imgb64) {
-        var img = document.createElement("img");
+        const img = document.createElement("img");
         img.src = `data:image/png;base64,${imgb64}`;
         img.classList.add("mii");
 
         return img;
     }
 
-    var miiTds = playerInfo.querySelectorAll(".mii");
-    var reqBody = {};
+    const miiTds = playerInfo.querySelectorAll(".mii");
+    const reqBody = {};
 
-    for (var miiTd of miiTds) {
-        var miiFromFc = miiByFc[miiTd.dataset.fc];
+    for (const miiTd of miiTds) {
+        const miiFromFc = miiByFc[miiTd.dataset.fc];
 
         if (miiFromFc) {
             miiTd.append(makeImg(miiFromFc));
@@ -83,7 +83,7 @@ async function getMiisForPlayerInfo(playerInfo) {
     if (isEmpty(reqBody))
         return;
 
-    var response = await fetch("./qrcoderc24", {
+    const response = await fetch("./qrcoderc24", {
         method: "POST",
         body: JSON.stringify(reqBody),
         headers: {
@@ -94,13 +94,13 @@ async function getMiisForPlayerInfo(playerInfo) {
     if (!response.ok)
         return;
 
-    var json = await response.json();
+    const json = await response.json();
 
     if (!json)
         return;
 
-    for (var miiTd of miiTds) {
-        var miiData = json[miiTd.dataset.fc];
+    for (const miiTd of miiTds) {
+        const miiData = json[miiTd.dataset.fc];
 
         if (miiData) {
             miiByFc[miiTd.dataset.fc] = miiData;
@@ -110,11 +110,11 @@ async function getMiisForPlayerInfo(playerInfo) {
 }
 
 function makePlayer(player) {
-    var tr = document.createElement("tr");
+    const tr = document.createElement("tr");
     tr.classList.add("player-row");
 
     if (player.mii && player.mii[0]) {
-        var miiTd = document.createElement("td");
+        const miiTd = document.createElement("td");
         miiTd.classList.add("mii");
         miiTd.dataset.fc = player.fc;
         miiTd.dataset.miiData = player.mii[0].data;
@@ -135,9 +135,9 @@ function makePlayer(player) {
 function makePlayerInfo(players) {
     var playerCount = 0;
 
-    var table = document.createElement("table");
-    var tHead = document.createElement("thead");
-    var tHeadTr = document.createElement("tr");
+    const table = document.createElement("table");
+    const tHead = document.createElement("thead");
+    const tHeadTr = document.createElement("tr");
     tHeadTr.append(makeTh("Mii"));
     tHeadTr.append(makeTh("Name"));
     tHeadTr.append(makeTh("Friend Code"));
@@ -145,10 +145,10 @@ function makePlayerInfo(players) {
     tHeadTr.append(makeTh("BR"));
     tHead.append(tHeadTr);
     table.append(tHead);
-    var tBody = document.createElement("tbody");
+    const tBody = document.createElement("tbody");
     table.append(tBody);
 
-    for (var id in players) {
+    for (const id in players) {
         tBody.append(makePlayer(players[id]));
         playerCount++;
     }
@@ -157,10 +157,10 @@ function makePlayerInfo(players) {
 }
 
 function makeRoom(room) {
-    var roomInfo = document.createElement("h3");
+    const roomInfo = document.createElement("h3");
     roomInfo.classList.add("room-info");
 
-    var [playerInfo, playerCount] = makePlayerInfo(room.players);
+    const [playerInfo, playerCount] = makePlayerInfo(room.players);
     getMiisForPlayerInfo(playerInfo);
 
     var roomType;
@@ -172,7 +172,7 @@ function makeRoom(room) {
     else
         roomType = "??";
 
-    var isPublic = room.type == "anybody";
+    const isPublic = room.type == "anybody";
     // room.type is actually the access: public or private
     roomInfo.append(makeSpan(isPublic ? "Public" : "Private", isPublic ? "public" : "private"));
     roomInfo.append(makeSpan(" "));
@@ -180,8 +180,8 @@ function makeRoom(room) {
     roomInfo.append(makeSpan(" - "));
     roomInfo.append(makeSpan("Up "));
 
-    var dateCreated = new Date(room.created);
-    var upSpan = document.createElement("span");
+    const dateCreated = new Date(room.created);
+    const upSpan = document.createElement("span");
     upSpan.dataset.created = dateCreated;
     upSpan.innerHTML = formatUptime(dateCreated, currentId == maxId ? new Date(Date.now()) : new Date(json_by_id[currentId].timestamp));
     upSpan.classList.add("upspan");
@@ -193,7 +193,7 @@ function makeRoom(room) {
     roomInfo.append(document.createElement("br"));
     roomInfo.append(makeSpan(`${playerCount} ${playerCount == 1 ? "Player" : "Players"}`, "players"));
     roomInfo.append(makeSpan(" - "));
-    var joinable = playerCount != 12;
+    const joinable = playerCount != 12;
     roomInfo.append(makeSpan(`${joinable ? "Joinable" : "Not Joinable"}`, joinable ? "joinable" : "not-joinable"));
 
     return [roomInfo, playerInfo, playerCount];
@@ -203,9 +203,9 @@ async function update(json) {
     if (!json)
         return;
 
-    var hasData = !!json.rooms;
+    const hasData = !!json.rooms;
 
-    var div = document.querySelector("div.scroll");
+    const div = document.querySelector("div.scroll");
     while (div.children.length > 0)
         div.removeChild(div.lastChild);
 
@@ -215,27 +215,31 @@ async function update(json) {
     var roomCount = 0;
 
     if (hasData) {
-        for (var room of json.rooms) {
-            var [roomInfo, playerInfo, roomPlayerCount] = makeRoom(room);
+        for (const room of json.rooms) {
+            const [roomInfo, playerInfo, roomPlayerCount] = makeRoom(room);
             div.append(roomInfo);
             div.append(playerInfo);
-            var hrDiv = document.createElement("div");
-            hrDiv.append(document.createElement("hr"));
+
+            const hrDiv = document.createElement("div");
+            const hr = document.createElement("hr");
+            hr.classList.add("no-margin-top");
+            hrDiv.append(hr);
             div.append(hrDiv);
+
             playerCount += roomPlayerCount;
             roomCount++;
         }
     }
     else {
-        var hrDiv = document.createElement("div");
+        const hrDiv = document.createElement("div");
         hrDiv.append(document.createElement("hr"));
         div.append(hrDiv);
     }
 
-    var pce = document.getElementById("player-count");
+    const pce = document.getElementById("player-count");
     pce.innerHTML = hasData ? playerCount : "??";
 
-    var rce = document.getElementById("room-count");
+    const rce = document.getElementById("room-count");
     rce.innerHTML = hasData ? roomCount : "??";
 
     document.getElementById("no-data").style.display = hasData ? "none" : "";
@@ -249,24 +253,24 @@ async function update(json) {
         rce.parentElement.classList.remove("excited");
     }
 
-    var date = new Date(json.timestamp);
+    const date = new Date(json.timestamp);
     document.getElementById("fetch-timestamp").innerHTML = `Data ID ${currentId} Fetched At ${pad(date.getHours(), 2)}:${pad(date.getMinutes(), 2)}:${pad(date.getSeconds(), 2)}`;
 }
 
 async function getRooms(id) {
     // TODO: This function sucks
-    function updateButtons() {
-        var forwards = document.getElementById("forwards");
-        var megaForwards = document.getElementById("mega-forwards");
-        var backwards = document.getElementById("backwards");
-        var megaBackwards = document.getElementById("mega-backwards");
+    function updateButtons(disableBack) {
+        const forwards = document.getElementById("forwards");
+        const megaForwards = document.getElementById("mega-forwards");
+        const backwards = document.getElementById("backwards");
+        const megaBackwards = document.getElementById("mega-backwards");
 
         if (currentId == maxId) {
             forwards.classList.remove("active");
             megaForwards.classList.remove("active");
         }
 
-        if (currentId == minId) {
+        if (currentId == minId || disableBack) {
             backwards.classList.remove("active");
             megaBackwards.classList.remove("active");
         }
@@ -276,7 +280,7 @@ async function getRooms(id) {
             megaForwards.classList.add("active");
         }
 
-        if (currentId != minId) {
+        if (currentId != minId && !disableBack) {
             backwards.classList.add("active");
             megaBackwards.classList.add("active");
         }
@@ -284,8 +288,8 @@ async function getRooms(id) {
 
     console.log(`fetching rooms with ${id != null ? `id ${id}` : "the latest id"}`);
 
-    if (id) {
-        var json = json_by_id[id];
+    if (id && typeof id === "number") {
+        const json = json_by_id[id];
 
         if (json) {
             currentId = json.id;
@@ -295,12 +299,14 @@ async function getRooms(id) {
         }
     }
 
-    var req = await fetch(`./groups${id != null ? `?id=${id}` : ""}`);
+    const req = await fetch(`./groups${id != null ? `?id=${id}` : ""}`);
 
-    if (!req.ok)
+    if (!req.ok) {
+        updateButtons(true);
         return null; // TODO: Handle error
+    }
 
-    var json = await req.json();
+    const json = await req.json();
 
     if (!json)
         return null;
@@ -329,10 +335,14 @@ async function forwards(mega) {
 
 // eslint-disable-next-line no-unused-vars
 async function backwards(mega) {
-    var realMin = Math.min(minId, maxId - Object.keys(json_by_id).length + 1);
+    const realMin = Math.min(minId, maxId - Object.keys(json_by_id).length + 1);
 
-    if (mega && currentId != realMin)
-        update(await getRooms(realMin));
+    if (mega && currentId != realMin) {
+        // Sometimes the minId can become desynced with the server, to avoid
+        // this, just send "min" instead of requesting an explicit ID, and the
+        // server will handle it
+        update(await getRooms(minId <= realMin ? "min" : realMin));
+    }
     else if (currentId - 1 >= realMin)
         update(await getRooms(currentId - 1));
 }
@@ -344,7 +354,7 @@ async function init() {
 
 // 1 minute
 setInterval(async () => {
-    var json = await getRooms();
+    const json = await getRooms();
 
     // If you're not on the most curren page, you don't get whisked away
     if (currentId == maxId)
@@ -358,8 +368,8 @@ setInterval(() => {
     if (!roomUpSpans)
         return;
 
-    for (var idx in roomUpSpans) {
-        var span = roomUpSpans[idx];
+    for (const idx in roomUpSpans) {
+        const span = roomUpSpans[idx];
         span.innerHTML = formatUptime(new Date(span.dataset.created), new Date(Date.now()));
     }
 }, 1000);
