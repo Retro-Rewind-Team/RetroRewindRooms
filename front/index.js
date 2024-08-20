@@ -10,7 +10,7 @@ function makeSpan(contents, classname) {
 
 function makeTd(contents) {
     const td = document.createElement("td");
-    td.innerHTML = contents;
+    td.textContent = contents;
     return td;
 }
 
