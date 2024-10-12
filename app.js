@@ -57,18 +57,22 @@ async function getMii(miiSpec) {
 
     try {
         // fc is used to cache responses on the server
-        const response = await fetch("https://qrcode.rc24.xyz/cgi-bin/studio.cgi", {
+        const response = await fetch("https://miicontestp.wii.rc24.xyz/cgi-bin/studio.cgi", {
             method: "POST",
             body: formData,
         });
 
-        if (!response.ok)
+        if (!response.ok) {
+            console.error("Bad response from qrcode.rc24.xyz, status code: " + response.status);
             return [fc, null];
+        }
 
         const json = await response.json();
 
-        if (!json || !json.mii)
+        if (!json || !json.mii) {
+            console.error("Malformed JSON response from qrcode.rc24.xyz");
             return [fc, null];
+        }
 
         const miiImageUrl = `https://studio.mii.nintendo.com/miis/image.png?data=${json.mii}&type=face&expression=normal&width=270&bgColor=FFFFFF00&clothesColor=default&cameraXRotate=0&cameraYRotate=0&cameraZRotate=0&characterXRotate=0&characterYRotate=0&characterZRotate=0&lightDirectionMode=none&instanceCount=1&instanceRotationMode=model`;
 
@@ -78,7 +82,8 @@ async function getMii(miiSpec) {
 
         return [fc, b64];
     }
-    catch {
+    catch (e) {
+        console.log("Unable to get mii, error: " + e);
         return [fc, null];
     }
 }
