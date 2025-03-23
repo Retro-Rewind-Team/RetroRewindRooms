@@ -163,6 +163,53 @@ app.get("/groups", function(req, res) {
     res.send(JSON.stringify(response));
 });
 
+function getDataForFC(fc) {
+    for (const i = groupResponses.length - 1; i > -1; i--) {
+        const group = groupResponses[i];
+
+        for (const ridx in group.rooms) {
+            const room = group.rooms[ridx];
+
+            for (const pidx in room.players) {
+                const player = room.players[pidx];
+
+                if (player.fc == fc && player.mii && player.mii[0])
+                    return player.mii[0].data;
+            }
+        }
+    }
+
+    return null;
+}
+
+app.get("/miiimg", async function(req, res) {
+    let imgb64;
+
+    if (!req.query.fc) {
+        res.status(404);
+        res.send("The queried FC was not found or does not have an associated Mii");
+        return;
+    }
+
+    if (!(imgb64 = responseByFc[req.query.fc])) {
+        let miiData;
+
+        if ((miiData = getDataForFC(req.query.fc)))
+            [_, imgb64] = await getMii([req.query.fc, miiData]);
+        else {
+            res.status(404);
+            res.send("The queried FC was not found or does not have an associated Mii");
+            return;
+        }
+    }
+
+    let img = Buffer.from(imgb64, "base64");
+    res.status(200);
+    res.set("Content-Type", "image/png");
+    res.set("Content-Length", img.length);
+    res.send(img);
+});
+
 var id = 0;
 function updateCachedGroups(response) {
     const len = groupResponses.push({ timestamp: Date.now(), rooms: response, id: id });
