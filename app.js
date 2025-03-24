@@ -164,7 +164,7 @@ app.get("/groups", function(req, res) {
 });
 
 function getDataForFC(fc) {
-    for (const i = groupResponses.length - 1; i > -1; i--) {
+    for (let i = groupResponses.length - 1; i > -1; i--) {
         const group = groupResponses[i];
 
         for (const ridx in group.rooms) {
