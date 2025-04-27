@@ -12,7 +12,7 @@ body {
     min-height: 100vh;
     margin: auto;
     color: white;
-    font-family: "Rubik", "CTMKF", monospace;
+    font-family: "CTMKF", "Rubik", monospace;
 }
 
 @media only screen and (max-width: 800px) {
@@ -190,6 +190,14 @@ hr {
 
 .avg-vr {
     color: #f5c2e7;
+}
+
+.oh-true {
+    color: #a6e3a1;
+}
+
+.oh-false {
+    color: #f38ba8;
 }
 
 table {

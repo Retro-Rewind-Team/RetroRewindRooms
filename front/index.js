@@ -8,9 +8,13 @@ function makeSpan(contents, classname) {
     return span;
 }
 
-function makeTd(contents) {
+function makeTd(contents, classname) {
     const td = document.createElement("td");
     td.textContent = contents;
+
+    if (classname)
+        td.classList.add(classname);
+
     return td;
 }
 
@@ -130,9 +134,14 @@ function makePlayer(player, priv) {
     tr.append(makeTd(player.eb ? player.eb : "??"));
 
     if (!priv) {
-        const lastTd = makeTd(player.openhost == "true" ? "✓" : "✗");
-        lastTd.style.fontFamily = "'JetBrains Mono', sans-serif";
-        tr.append(lastTd);
+        let ohtd;
+        if (player.openhost == "true")
+            ohtd = makeTd("✓", "oh-true");
+        else
+            ohtd = makeTd("✗", "oh-false");
+
+        ohtd.style.fontFamily = "'JetBrains Mono', sans-serif";
+        tr.append(ohtd);
     }
 
     return tr;
