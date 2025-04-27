@@ -129,8 +129,11 @@ function makePlayer(player, priv) {
     tr.append(makeTd(player.ev ? player.ev : "??"));
     tr.append(makeTd(player.eb ? player.eb : "??"));
 
-    if (!priv)
-        tr.append(makeTd(player.openhost == "true" ? "T" : "F"));
+    if (!priv) {
+        const lastTd = makeTd(player.openhost == "true" ? "✓" : "✗");
+        lastTd.style.fontFamily = "'JetBrains Mono', sans-serif";
+        tr.append(lastTd);
+    }
 
     return tr;
 }
