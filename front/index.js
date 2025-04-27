@@ -109,7 +109,7 @@ async function getMiisForPlayerInfo(playerInfo) {
     }
 }
 
-function makePlayer(player) {
+function makePlayer(player, priv) {
     const tr = document.createElement("tr");
     tr.classList.add("player-row");
 
@@ -129,10 +129,13 @@ function makePlayer(player) {
     tr.append(makeTd(player.ev ? player.ev : "??"));
     tr.append(makeTd(player.eb ? player.eb : "??"));
 
+    if (!priv)
+        tr.append(makeTd(player.openhost == "true" ? "T" : "F"));
+
     return tr;
 }
 
-function makePlayerInfo(players) {
+function makePlayerInfo(players, priv) {
     var playerCount = 0;
 
     const table = document.createElement("table");
@@ -143,13 +146,15 @@ function makePlayerInfo(players) {
     tHeadTr.append(makeTh("Friend Code"));
     tHeadTr.append(makeTh("VR"));
     tHeadTr.append(makeTh("BR"));
+    if (!priv)
+        tHeadTr.append(makeTh("OH"));
     tHead.append(tHeadTr);
     table.append(tHead);
     const tBody = document.createElement("tbody");
     table.append(tBody);
 
     for (const id in players) {
-        tBody.append(makePlayer(players[id]));
+        tBody.append(makePlayer(players[id], priv));
         playerCount++;
     }
 
@@ -157,10 +162,12 @@ function makePlayerInfo(players) {
 }
 
 function makeRoom(room) {
+    const isPublic = room.type == "anybody";
+
     const roomInfo = document.createElement("h3");
     roomInfo.classList.add("room-info");
 
-    const [playerInfo, playerCount] = makePlayerInfo(room.players);
+    const [playerInfo, playerCount] = makePlayerInfo(room.players, !isPublic);
     getMiisForPlayerInfo(playerInfo);
 
     var roomType;
@@ -172,7 +179,6 @@ function makeRoom(room) {
     else
         roomType = "??";
 
-    const isPublic = room.type == "anybody";
     // room.type is actually the access: public or private
     roomInfo.append(makeSpan(isPublic ? "Public" : "Private", isPublic ? "public" : "private"));
     roomInfo.append(makeSpan(" "));
