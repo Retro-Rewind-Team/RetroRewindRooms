@@ -195,8 +195,12 @@ function makeRoom(room) {
     roomInfo.append(makeSpan(" - "));
     const joinable = playerCount != 12;
     roomInfo.append(makeSpan(`${joinable ? "Joinable" : "Not Joinable"}`, joinable ? "joinable" : "not-joinable"));
-    roomInfo.append(makeSpan(" - "));
-    roomInfo.append(makeSpan(`Average VR: ${room.averageVR > 0 ? room.averageVR : "??"}`));
+
+    if (room.averageVR > 0) {
+        roomInfo.append(makeSpan(" - "));
+        roomInfo.append(makeSpan(`${room.averageVR} VR Avg`, "avg-vr"));
+        // roomInfo.append(makeSpan(" VR Avg"));
+    }
 
     return [roomInfo, playerInfo, playerCount];
 }
