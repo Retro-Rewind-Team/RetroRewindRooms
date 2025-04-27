@@ -153,6 +153,24 @@ app.get("/groups", function(req, res) {
         return;
     }
 
+    // calculate average vr for each room
+    for (const room of response.rooms) {
+        // if room has no players, or players object doesnt exist then set vr to null
+        if (!room.players || room.players.length === 0) {
+            room.averageVR = null;
+            continue;
+        }
+        const players = Object.values(room.players);
+
+        // Only players who actually have a valid vr
+        const playersWithVR = players.filter(player => player.ev !== undefined);
+
+        const totalVR = playersWithVR.reduce((sum, player) => sum + Number(player.ev || 0), 0);
+        const averageVR = playersWithVR.length > 0 ? totalVR / playersWithVR.length : 0;
+
+        room.averageVR = Math.round(averageVR);
+    }
+
     // Minimum allowed id at a given time
     response.minimum_id = groupResponses[0].id;
 
