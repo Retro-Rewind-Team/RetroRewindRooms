@@ -15,7 +15,7 @@ app.use((_, res, next) => {
     next();
 });
 
-// Hold cached responses from zplwii.xyz/api/groups
+// Hold cached responses from rwfc.net/api/groups
 const groupResponses = [];
 
 // Holds the b64 img data
@@ -149,7 +149,7 @@ app.get("/groups", function(req, res) {
     const response = groupResponses[idx];
     if (!response) {
         res.status(404);
-        res.send(`Response does not exist for id ${id}, but it should. Is zplwii.xyz down or is it just not populated yet?`);
+        res.send(`Response does not exist for id ${id}, but it should. Is rwfc.net down or is it just not populated yet?`);
         return;
     }
 
@@ -241,7 +241,7 @@ function updateCachedGroups(response) {
 
 async function updateGroups() {
     try {
-        const response = await fetch("http://zplwii.xyz/api/groups");
+        const response = await fetch("http://rwfc.net/api/groups");
 
         var json = null;
 
