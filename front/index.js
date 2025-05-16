@@ -173,6 +173,41 @@ function makePlayerInfo(players, priv) {
     return [table, playerCount];
 }
 
+const REGIONTOROOMTYPE = {
+    "vs": "Regular",
+    "vs_10": "Retro VS",
+    "vs_11": "Retro OTT",
+    "vs_12": "Retro 200cc",
+    "vs_20": "Retro VS CT",
+    "vs_21": "Retro OTT CT",
+    "vs_22": "Retro 200cc CT",
+    "vs_69": "IKW VS",
+    "vs_70": "IKW Ultras VS",
+    "vs_71": "IKW Countdown",
+    "vs_72": "IKW Bob-omb Blast",
+    "vs_73": "IKW Infinite Acceleration",
+    "vs_74": "IKW Banana Slip",
+    "vs_75": "IKW Random Items",
+    "vs_76": "IKW Unfair Items",
+    "vs_77": "IKW Blue Shell Madness",
+    "vs_78": "IKW Mushroom Dash",
+    "vs_79": "IKW Bumper Karts",
+    "vs_80": "IKW Item Rampage",
+    "vs_81": "IKW Item Rain",
+    "vs_82": "IKW Shell Break",
+    "vs_83": "IKW Riibalanced Stats",
+    "vs_666": "Luminous VS",
+    "vs_668": "CTGP-C VS",
+    "vs_875": "OptPack VS",
+    "vs_876": "OptPack OTT",
+    "vs_877": "OptPack Reserved",
+    "vs_878": "OptPack Reserved",
+    "vs_879": "OptPack Reserved",
+    "vs_1312": "WTP VS",
+    "vs_1313": "WTP 200cc",
+    "vs_1314": "WTP OTT",
+};
+
 function makeRoom(room) {
     const isPublic = room.type == "anybody";
 
@@ -182,19 +217,12 @@ function makeRoom(room) {
     const [playerInfo, playerCount] = makePlayerInfo(room.players, !isPublic);
     getMiisForPlayerInfo(playerInfo);
 
-    var roomType;
-
-    if (room.rk == "vs_10" || room.rk == "vs_751")
-        roomType = "VS";
-    else if (room.rk == "vs_11")
-        roomType = "TT";
-    else
-        roomType = "??";
+    var roomType = REGIONTOROOMTYPE[room.rk] ?? "";
 
     // room.type is actually the access: public or private
     roomInfo.append(makeSpan(isPublic ? "Public" : "Private", isPublic ? "public" : "private"));
     roomInfo.append(makeSpan(" "));
-    roomInfo.append(makeSpan(`${roomType == "??" ? "" : roomType} Room`));
+    roomInfo.append(makeSpan(`${roomType} Room`));
     roomInfo.append(makeSpan(" - "));
     roomInfo.append(makeSpan("Up "));
 
