@@ -183,7 +183,7 @@ const REGIONTOROOMTYPE = {
     "vs_22": "Retro 200cc CT",
     "vs_69": "IKW VS",
     "vs_70": "IKW Ultras VS",
-    "vs_71": "IKW Countdown",
+    "vs_71": "IKW Crazy Items",
     "vs_72": "IKW Bob-omb Blast",
     "vs_73": "IKW Infinite Acceleration",
     "vs_74": "IKW Banana Slip",
